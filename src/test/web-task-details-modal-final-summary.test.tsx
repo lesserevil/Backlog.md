@@ -52,6 +52,64 @@ describe("Web task popup Final Summary display", () => {
 		expect(html).toContain("PR-style summary");
 	});
 
+	it("renders Comments section in preview when present", () => {
+		setupDom();
+
+		const task: Task = {
+			id: "TASK-10",
+			title: "Task with comments",
+			status: "To Do",
+			assignee: [],
+			createdDate: "2025-01-01",
+			labels: [],
+			dependencies: [],
+			comments: [
+				{
+					index: 1,
+					author: "@reviewer",
+					createdDate: "2025-01-02 12:00",
+					body: "Rendered comment body",
+				},
+			],
+		};
+
+		const html = renderToString(
+			<ThemeProvider>
+				<TaskDetailsModal task={task} isOpen={true} onClose={() => {}} />
+			</ThemeProvider>,
+		);
+
+		expect(html).toContain("Comments");
+		expect(html).toContain("@reviewer");
+		expect(html).toContain("Rendered comment body");
+		expect(html).toContain("Add comment");
+	});
+
+	it("does not render comment form for cross-branch tasks", () => {
+		setupDom();
+
+		const task: Task = {
+			id: "TASK-11",
+			title: "Read-only comments",
+			status: "To Do",
+			assignee: [],
+			createdDate: "2025-01-01",
+			labels: [],
+			dependencies: [],
+			branch: "feature/comments",
+			comments: [{ index: 1, createdDate: "2025-01-02 12:00", body: "Read-only comment" }],
+		};
+
+		const html = renderToString(
+			<ThemeProvider>
+				<TaskDetailsModal task={task} isOpen={true} onClose={() => {}} />
+			</ThemeProvider>,
+		);
+
+		expect(html).toContain("Read-only comment");
+		expect(html).not.toContain("Add comment");
+	});
+
 	it("hides Final Summary section in preview when empty", () => {
 		setupDom();
 
